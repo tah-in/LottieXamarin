@@ -175,9 +175,7 @@ namespace Lottie.Forms.Droid
             if (this.client == null)
                 this.client = new OkHttpClient();
 
-            var newcall = client.NewCall(request);
-
-            newcall.Enqueue((ICall call, Response response) =>
+            client.NewCall(request).Enqueue((ICall call, Response response) =>
             {
                 if (!response.IsSuccessful)
                 {
