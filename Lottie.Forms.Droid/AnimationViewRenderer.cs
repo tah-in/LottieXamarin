@@ -6,6 +6,9 @@ using Lottie.Forms;
 using Lottie.Forms.Droid;
 using Xamarin.Forms;
 using Xamarin.Forms.Platform.Android;
+using System.Net.Http;
+using Square.OkHttp3;
+using Org.Json;
 
 [assembly: ExportRenderer(typeof(AnimationView), typeof(AnimationViewRenderer))]
 
@@ -16,6 +19,7 @@ namespace Lottie.Forms.Droid
     {
         private LottieAnimationView _animationView;
         private AnimatorListener _animatorListener;
+        private OkHttpClient client;
 
         /// <summary>
         ///     Used for registration with dependency service
@@ -58,7 +62,8 @@ namespace Lottie.Forms.Droid
 
                 if (!string.IsNullOrEmpty(e.NewElement.Animation))
                 {
-                    _animationView.SetAnimation(e.NewElement.Animation);
+                    //_animationView.SetAnimation(e.NewElement.Animation);
+                    InitAnimationViewForElement(Element);
                     Element.Duration = TimeSpan.FromMilliseconds(_animationView.Duration);
                 }
 
@@ -102,7 +107,8 @@ namespace Lottie.Forms.Droid
         {
             if (e.PropertyName == AnimationView.AnimationProperty.PropertyName)
             {
-                _animationView.SetAnimation(Element.Animation);
+                //_animationView.SetAnimation(Element.Animation);
+                InitAnimationViewForElement(Element);
                 Element.Duration = TimeSpan.FromMilliseconds(_animationView.Duration);
                 if (Element.AutoPlay) _animationView.PlayAnimation();
             }
@@ -135,6 +141,66 @@ namespace Lottie.Forms.Droid
             {
                 _animationView.Click();
             }
+        }
+
+        private void InitAnimationViewForElement(AnimationView theElement)
+        { 
+            if(!theElement.IsLocal)
+            {
+                LoadUrl(theElement.Animation);
+            }
+            else
+            {
+                _animationView.SetAnimation(theElement.Animation);
+            }
+             
+        }
+        private void LoadUrl(String url)
+        {
+            
+            Request request;
+            try
+            {
+                request = new Request.Builder()
+                                     .Url(url)
+                                     .Build();
+            }
+            catch (Exception ex)
+            {
+                //OnLoadError();
+                return;
+            }
+
+
+            if (this.client == null)
+                this.client = new OkHttpClient();
+
+            var newcall = client.NewCall(request);
+
+            newcall.Enqueue((ICall call, Response response) =>
+            {
+                if (!response.IsSuccessful)
+                {
+                    //OnLoadError();
+                }
+
+                try
+                {
+                    LottieComposition.Factory.FromJsonString(response.Body().String(), (composition) =>
+                    {
+                        _animationView.Composition = composition;
+                    });
+                }
+                catch
+                {
+                    //OnLoadError();
+                }
+
+            }, (ICall call, Java.IO.IOException e) => 
+            {
+                
+                //OnLoadError();
+            });
         }
     }
 }
