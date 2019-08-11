@@ -9,6 +9,8 @@ using Xamarin.Forms.Platform.Android;
 using System.Net.Http;
 using Square.OkHttp3;
 using Org.Json;
+using System.IO;
+using System.Text;
 
 [assembly: ExportRenderer(typeof(AnimationView), typeof(AnimationViewRenderer))]
 
@@ -151,9 +153,20 @@ namespace Lottie.Forms.Droid
             }
             else
             {
-                _animationView.SetAnimation(theElement.Animation);
+                if (File.Exists(theElement.Animation))
+                {
+                    var fileStream = new FileStream(theElement.Animation, FileMode.Open, FileAccess.Read);
+                    using (var streamReader = new StreamReader(fileStream, Encoding.UTF8))
+                    {
+                        var json = new JSONObject(streamReader.ReadToEnd());
+                        _animationView.SetAnimation(json);
+                    }
+                }
+                else
+                {
+                    _animationView.SetAnimation(theElement.Animation);
+                }
             }
-             
         }
         private void LoadUrl(String url)
         {
