@@ -12,7 +12,6 @@
     <TargetFrameworkVersion>v8.1</TargetFrameworkVersion>
     <MonoAndroidResourcePrefix>Resources</MonoAndroidResourcePrefix>
     <MonoAndroidAssetsPrefix>Assets</MonoAndroidAssetsPrefix>
-    <AndroidUseLatestPlatformSdk>true</AndroidUseLatestPlatformSdk>
     <AndroidTlsProvider></AndroidTlsProvider>
     <ReleaseVersion>2.5.0.0</ReleaseVersion>
     <SynchReleaseVersion>false</SynchReleaseVersion>
